@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.core.defchararray import mod
+import math
 
 # Calculates x,y position given angle and distance
 # returns a tuple of (xnew,ynew)
@@ -40,7 +40,7 @@ class EnvironmentGrid:
     # Calculates the number of cells in a row of the
     # environment grid.
     def getNumCellsPerRow(self):
-        return int(self.sideLength/self.granularity)
+        return math.floor(self.sideLength/self.granularity)
     
     # Creates the container for the environment grid
     def createEnvironmentGrid(self):
@@ -72,6 +72,6 @@ class EnvironmentGrid:
     
     # Returns the coordinates of a cell after being given the x and y position
     def mapPositionToCell(self, x, y):
-        i = int(x/self.granularity)
-        j = int(y/self.granularity)
+        i = math.floor(x/self.granularity)
+        j = math.floor(y/self.granularity)
     
