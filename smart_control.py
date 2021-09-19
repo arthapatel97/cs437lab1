@@ -98,5 +98,6 @@ def Keyborad_control():
 
 if __name__ == '__main__':
     scan_surrondings()
+    print(servo_map)
     fc.servo.set_angle(0)
     Keyborad_control()
