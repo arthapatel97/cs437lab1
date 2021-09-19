@@ -31,9 +31,9 @@ def readkey(getchar_fn=None):
 
 def turn_servo(dir: int):
     if dir == 0:
-        fc.current_angle -= fc.STEP
-    else:
         fc.current_angle += fc.STEP
+    else:
+        fc.current_angle -= fc.STEP
     fc.servo.set_angle(fc.current_angle)
 
 def Keyborad_control():
@@ -58,10 +58,8 @@ def Keyborad_control():
         elif key=='d':
             fc.turn_right(power_val)
         elif key=='n':
-            print("Trying to Turn the servo to the left")
             turn_servo(0)
         elif key=='m':
-            print("Trying to Turn the servo to the right")
             turn_servo(1)
         else:
             fc.stop()
