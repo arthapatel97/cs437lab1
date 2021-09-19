@@ -6,6 +6,8 @@ import asyncio
 
 power_val = 50
 
+servo_step = 2
+
 key = 'status'
 print("If you want the program quit.Please press q")
 def readchar():
@@ -31,10 +33,12 @@ def readkey(getchar_fn=None):
 
 def turn_servo(dir: int):
     if dir == 0:
-        fc.current_angle += fc.STEP
+        fc.current_angle += servo_step
     else:
-        fc.current_angle -= fc.STEP
+        fc.current_angle -= servo_step
     fc.servo.set_angle(fc.current_angle)
+    print("Current Angle: {}".format(fc.current_angle))
+    print("Current Reading on Sensor: {}".format(fc.us.get_distance()))
 
 def Keyborad_control():
     while True:
