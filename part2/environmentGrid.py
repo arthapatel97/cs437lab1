@@ -23,7 +23,7 @@ class EnvironmentGrid:
         self.robotY = self.sideLength/2
 
         # The start orientation of our little guy.
-        self.orientation = 
+        self.orientation = 0
     
     # Calculates the number of cells in a row of the
     # environment grid.
