@@ -33,3 +33,9 @@ class EnvironmentGrid:
     # Creates the container for the environment grid
     def createEnvironmentGrid(self):
         return np.zeros((self.getNumCellsPerRow(), self.numCellsPerRow()))    
+
+
+    # Calculates x,y position given angle and distance
+    # returns a tuple of (xnew,ynew)
+    def getPosition(x_init,y_init,angle,dist):
+        return ( x_init + dist*np.cos(angle) , y_init + dist*np.sin(angle) )
