@@ -3,13 +3,24 @@ import sys
 import tty
 import termios
 import asyncio
+import threading
 
 power_val = 50
 
 servo_step = 2
 
 key = 'status'
-print("If you want the program quit.Please press q")
+
+servo_map = []
+
+# def scan_surrondings():
+
+
+# def add_servo_map(angle, distance):
+
+
+
+print("If you want the program quit. Please press q")
 def readchar():
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
@@ -33,9 +44,11 @@ def readkey(getchar_fn=None):
 
 def turn_servo(dir: int):
     if dir == 0:
-        fc.current_angle += servo_step
+        if not fc.current_angle >= fc.max_angle:
+            fc.current_angle += servo_step
     else:
-        fc.current_angle -= servo_step
+        if not fc.current_angle <= fc.min_angle:
+            fc.current_angle -= servo_step
     fc.servo.set_angle(fc.current_angle)
     print("Current Angle: {}".format(fc.current_angle))
     print("Current Reading on Sensor: {}".format(fc.us.get_distance()))
