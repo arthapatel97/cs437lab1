@@ -11,14 +11,26 @@ servo_step = 2
 
 key = 'status'
 
+distances_list = []
 servo_map = []
 
-# def scan_surrondings():
+def init_servo_map(angle_interval=2):
+    global servo_map
+
+    angle = fc.max_angle
+    while angle >= fc.min_angle:
+        angle -= angle_interval
+        servo_map.append((angle, 0))
 
 
-# def add_servo_map(angle, distance):
+def scan_surrondings(angle_interval=2):
+    global servo_map
 
-
+    fc.servo.set_angle(fc.max_angle)
+    while fc.current_angle >= fc.min_angle:
+        fc.current_angle -= angle_interval
+        fc.servo.set_angle(fc.current_angle)
+        servo_map.append((fc.current_angle, fc.us.get_distance()))
 
 print("If you want the program quit. Please press q")
 def readchar():
@@ -42,13 +54,13 @@ def readkey(getchar_fn=None):
     c3 = getchar()
     return chr(0x10 + ord(c3) - 65)
 
-def turn_servo(dir: int):
+def turn_servo(dir: int, at=2):
     if dir == 0:
         if not fc.current_angle >= fc.max_angle:
-            fc.current_angle += servo_step
+            fc.current_angle += at
     else:
         if not fc.current_angle <= fc.min_angle:
-            fc.current_angle -= servo_step
+            fc.current_angle -= at
     fc.servo.set_angle(fc.current_angle)
     print("Current Angle: {}".format(fc.current_angle))
     print("Current Reading on Sensor: {}".format(fc.us.get_distance()))
@@ -85,5 +97,6 @@ def Keyborad_control():
             break  
 
 if __name__ == '__main__':
+    scan_surrondings()
     fc.servo.set_angle(0)
     Keyborad_control()
