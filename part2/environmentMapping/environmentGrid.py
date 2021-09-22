@@ -1,21 +1,22 @@
 import numpy as np
+import sys
 import math
 
 # Calculates x,y position given angle and distance
 # returns a tuple of (xnew,ynew)
-def getPosition(x_init, y_init, angle, dist):
-    return ( x_init + dist*np.cos(angle) , y_init + dist*np.sin(angle) )
+def getPosition(x_origin, y_origin, angle, dist):
+    return (x_origin + dist*np.cos(math.radians(angle)), y_origin + dist*np.sin(math.radians(angle)))
 
 # The environment grid that will contain our robot's surroundings
 # Origin is at the top-left corner
 # The origin of the orientation is parallel to the X-axis, and increasing
 # the angle is counter-clockwise, and decreasing the angle is clockwise
 class EnvironmentGrid:
-    def __init__(self, granularity, sideLength):
-        self.initializeEmptyGrid(granularity, sideLength)
+    def __init__(self, granularity, sideLength, impactDistance):
+        self.initializeEmptyGrid(granularity, sideLength, impactDistance)
     
     # Initializes an empty grid with a certain granularity and sideLength
-    def initializeEmptyGrid(self, granularity, sideLength):
+    def initializeEmptyGrid(self, granularity, sideLength, impactDistance):
         # The size of each square in the environment grid
         # measured in centimeters
         self.granularity = granularity
@@ -37,6 +38,21 @@ class EnvironmentGrid:
         # The start orientation of our little guy.
         self.RobotOrientation = 0
 
+        # impactDistance is the threshold distance that is considered to be an impact risk
+        self.impactDistance = impactDistance
+
+    # Takes the output of the picar as input.
+    # scanOutput is a list of tuples, where each tuple
+    # contains two values: a degree, and a distance
+    # The degree is the degree at which the measurement was taken,
+    # and the distance is the recorded distance
+    def processScanOutput(self, scanOutput):
+        for i in scanOutput:
+            degrees = i[0]
+            measuredDistance = i[1]
+            if (measuredDistance <= self.impactDistance):
+                self.recordObstacle(degrees, measuredDistance)
+
     # Calculates the number of cells in a row of the
     # environment grid.
     def getNumCellsPerRow(self):
@@ -44,7 +60,7 @@ class EnvironmentGrid:
     
     # Creates the container for the environment grid
     def createEnvironmentGrid(self):
-        return np.zeros((self.getNumCellsPerRow(), self.numCellsPerRow()))    
+        return np.zeros((self.getNumCellsPerRow(), self.getNumCellsPerRow()))    
 
     # Updates the position of the robot
     def updatePosition(self, timeStep, velocity):
@@ -57,7 +73,7 @@ class EnvironmentGrid:
     # Checks whether the cell is valid
     def isValidCell(self, i, j):
         if (i >= 0 and j >= 0):
-            if (i < np.size(self.map)[0] and j < np.size(self.map)[1]):
+            if (i < np.shape(self.map)[0] and j < np.shape(self.map)[1]):
                 return True
         return False
 
@@ -72,6 +88,20 @@ class EnvironmentGrid:
     
     # Returns the coordinates of a cell after being given the x and y position
     def mapPositionToCell(self, x, y):
-        i = math.floor(x/self.granularity)
-        j = math.floor(y/self.granularity)
-    
+        j = math.floor(x/self.granularity)
+        i = math.floor(y/self.granularity)
+        return [i, j]
+
+# # Testing the environment mapping
+
+# scanOutput = []
+# for i in range(90):
+#     currentOutput = (45 - i, 20)
+#     scanOutput.append(currentOutput)
+
+# testEnvironment = EnvironmentGrid(5, 100, 40)
+# testEnvironment.processScanOutput(scanOutput)
+
+# np.set_printoptions(threshold=sys.maxsize)
+
+# print(testEnvironment.map)
