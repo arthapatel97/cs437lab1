@@ -23,6 +23,8 @@ import argparse
 import io
 import re
 import time
+import signal
+import sys
 
 from annotation import Annotator
 
@@ -103,6 +105,7 @@ def annotate_objects(annotator, results, labels):
     annotator.text([xmin, ymin],
                    '%s\n%.2f' % (labels[obj['class_id']], obj['score']))
 
+camera = None;
 
 def main():
   parser = argparse.ArgumentParser(
@@ -124,32 +127,45 @@ def main():
   interpreter.allocate_tensors()
   _, input_height, input_width, _ = interpreter.get_input_details()[0]['shape']
 
-  with picamera.PiCamera(
-      resolution=(CAMERA_WIDTH, CAMERA_HEIGHT), framerate=30) as camera:
-    camera.start_preview()
-    try:
-      stream = io.BytesIO()
-      annotator = Annotator(camera)
-      for _ in camera.capture_continuous(
-          stream, format='jpeg', use_video_port=True):
-        stream.seek(0)
-        image = Image.open(stream).convert('RGB').resize(
-            (input_width, input_height), Image.ANTIALIAS)
-        start_time = time.monotonic()
-        results = detect_objects(interpreter, image, args.threshold)
-        elapsed_ms = (time.monotonic() - start_time) * 1000
+  # with picamera.PiCamera(
+  #     resolution=(CAMERA_WIDTH, CAMERA_HEIGHT), framerate=30) as camera:
+  global camera
+  camera = picamera.PiCamera(
+    resolution=(CAMERA_WIDTH, CAMERA_HEIGHT), framerate=30)
+  camera.start_preview()
+  try:
+    stream = io.BytesIO()
+    annotator = Annotator(camera)
+    for _ in camera.capture_continuous(
+        stream, format='jpeg', use_video_port=True):
+      stream.seek(0)
+      image = Image.open(stream).convert('RGB').resize(
+          (input_width, input_height), Image.ANTIALIAS)
+      start_time = time.monotonic()
+      results = detect_objects(interpreter, image, args.threshold)
+      elapsed_ms = (time.monotonic() - start_time) * 1000
 
-        annotator.clear()
-        annotate_objects(annotator, results, labels)
-        annotator.text([5, 0], '%.1fms' % (elapsed_ms))
-        annotator.update()
+      annotator.clear()
+      annotate_objects(annotator, results, labels)
+      annotator.text([5, 0], '%.1fms' % (elapsed_ms))
+      annotator.update()
 
-        stream.seek(0)
-        stream.truncate()
+      stream.seek(0)
+      stream.truncate()
 
-    finally:
-      camera.stop_preview()
+  finally:
+    camera.stop_preview()
 
+      
+
+## Catches SIGINT and remove camera window
+def signal_handler(sig, frame):
+    print("interrupted, removing camera instance")
+    global camera
+    camera.stop_preview()
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 if __name__ == '__main__':
   main()
