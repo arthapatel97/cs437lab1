@@ -85,6 +85,8 @@ def detect_objects(interpreter, image, threshold):
           'class_id': classes[i],
           'score': scores[i]
       }
+      if classes[i] == 12:
+            print("STOP SIGN!!!!!!!!")
       results.append(result)
   return results
 
@@ -144,6 +146,8 @@ def main():
           (input_width, input_height), Image.ANTIALIAS)
       start_time = time.monotonic()
       results = detect_objects(interpreter, image, args.threshold)
+      class_id = results
+      # print("results: {}".format(results))
       elapsed_ms = (time.monotonic() - start_time) * 1000
 
       annotator.clear()
