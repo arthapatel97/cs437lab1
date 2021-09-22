@@ -1,6 +1,7 @@
 import environmentGrid as env
 import uv_scan as sam
 import numpy as np
+from PIL import Image
 
 GRANULARITY = 5
 SIDE_LENGTH = 90
@@ -16,8 +17,11 @@ def getMap(granularity=GRANULARITY, sideLength=SIDE_LENGTH, impactDistance=IMPAC
     # added as per Sam's request <3
     map = testEnvironment.map
     middle = np.int(np.shape(map)[0]/2)
-    print(middle)
-    map[middle, middle] = -2
+    map[middle, middle] = 1
+    map = map * 255
+
+    im = Image.fromarray(map)
+    im.show()
 
     return map
 
