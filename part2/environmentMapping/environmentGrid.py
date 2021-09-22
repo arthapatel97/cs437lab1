@@ -50,6 +50,8 @@ class EnvironmentGrid:
         for i in scanOutput:
             degrees = i[0]
             measuredDistance = i[1]
+            if (measuredDistance < 0):
+                measuredDistance = sys.maxsize
             if (measuredDistance <= self.impactDistance):
                 self.recordObstacle(degrees, measuredDistance)
 
