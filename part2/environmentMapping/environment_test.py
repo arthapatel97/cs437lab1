@@ -3,7 +3,7 @@ import uv_scan as sam
 import numpy as np
 from PIL import Image
 
-GRANULARITY = 5
+GRANULARITY = 1
 SIDE_LENGTH = 90
 IMPACT_DISTANCE = 40
 
@@ -21,6 +21,7 @@ def getMap(granularity=GRANULARITY, sideLength=SIDE_LENGTH, impactDistance=IMPAC
     map = map * 255
 
     im = Image.fromarray(map)
+    im = im.resize((500, 500))
     im.show()
 
     return map

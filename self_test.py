@@ -3,9 +3,9 @@ import time
 
 if __name__ == "__main__":
     fc.servo.set_angle(fc.min_angle)
-    fc.forward(100)
-    time.sleep(2)
-    fc.stop()
+    # fc.forward(100)
+    # time.sleep(2)
+    # fc.stop()
     distance = fc.us.get_distance()
     print(distance)
     while True:
