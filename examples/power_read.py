@@ -1,4 +1,3 @@
-from time import sleep
 
 def power_read():
     from picar_4wd.adc import ADC
@@ -16,7 +15,7 @@ def power_read():
 def main():
     while (True):
         print("battery level: {}".format(power_read()))
-        sleep(0.01)
+        sleep(0.5)
 
 
 if __name__ == '__main__':
