@@ -36,11 +36,9 @@ def speedometer_handler():
     while running:
         current_speed = fc.speed_val()
         distance_covered += current_speed * 0.5
-        # print("Distance Covered: {}".format(distance_covered))
         speed_num += 1
         speed_cum += current_speed
         avg_speed = round(speed_cum/speed_num, 2)
-        # print("Average Speed: {}".format(avg_speed))
         time.sleep(0.5)
 
 def key_reader_handler():
@@ -48,7 +46,6 @@ def key_reader_handler():
     global running
 
     while running:
-        print("reading key")
         key=readkey()
         print(f"key is {key}")
         if key=='o':
@@ -83,8 +80,6 @@ def turn_servo(dir: int, at=2):
         if not fc.current_angle <= fc.min_angle:
             fc.current_angle -= at
     fc.servo.set_angle(fc.current_angle)
-    # print("Current Angle: {}".format(fc.current_angle))
-    # print("Current Reading on Sensor: {}".format(fc.us.get_distance()))
 
 def driver_control():
     global power_val
@@ -93,59 +88,42 @@ def driver_control():
     global current_position
     global avg_speed
     global key
-    print("this is the driver thread...")
+
     while running:
         if key=='6':
             if power_val <=90:
                 power_val += 10
-                print("power_val:",power_val)
+                print("increased power supply to: {power_val}")
         elif key=='4':
             if power_val >=10:
                 power_val -= 10
-                print("power_val:",power_val)
+                print("decreased power supply to: {power_val}")
         if key=='w':
-            message = PositionMessage(orientation_degree, current_position, avg_speed, MOVING_FORWARD)
-            logger.append_log(message)
+            logger.append_log(PositionMessage(orientation_degree, current_position, avg_speed, MOVING_FORWARD))
             fc.forward(power_val)
-            time.sleep(0.1)
         elif key=='a':
-            message = PositionMessage(orientation_degree, current_position, avg_speed, TURNING_LEFT)
-            logger.append_log(message)
+            logger.append_log(PositionMessage(orientation_degree, current_position, avg_speed, TURNING_LEFT))
             fc.turn_left(power_val)
-            time.sleep(0.1)
         elif key=='s':
-            message = PositionMessage(orientation_degree, current_position, avg_speed, MOVING_FORWARD)
-            logger.append_log(message)
+            logger.append_log(PositionMessage(orientation_degree, current_position, avg_speed, MOVING_FORWARD))
             fc.backward(power_val)
-            time.sleep(0.1)
         elif key=='d':
-            message = PositionMessage(orientation_degree, current_position, avg_speed, TURNING_RIGHT)
-            logger.append_log(message)
+            logger.append_log(PositionMessage(orientation_degree, current_position, avg_speed, TURNING_RIGHT))
             fc.turn_right(power_val)
-            time.sleep(0.1)
         elif key=='n':
             turn_servo(0)
-            time.sleep(0.1)
+            key = 'status'
         elif key=='m':
             turn_servo(1)
-            time.sleep(0.1)
-        elif key=='o':
-            fc.stop()
+            key = 'status'
         else:
-            message = PositionMessage(orientation_degree, current_position, avg_speed, IDLE)
-            logger.append_log(message)
-            fc.stop() 
-            # key = 'status'
+            logger.append_log(PositionMessage(orientation_degree, current_position, avg_speed, IDLE))
+            fc.stop()
 
 def start_speedometer_thread():
     global speedometer_thread
     speedometer_thread = Thread(target=speedometer_handler)
     speedometer_thread.start()
-
-# def start_driver_thread():
-#     global driver_thread
-#     driver_thread = Thread(target=driver_control)
-#     driver_thread.start()
 
 def start_key_thread():
     global key_thread
@@ -153,30 +131,28 @@ def start_key_thread():
     key_thread.start()
 
 def fire_up_threads():
-    # fc.start_speed_thread()
-    # start_speedometer_thread()
+    init()
+    fc.start_speed_thread()
+    start_speedometer_thread()
     start_key_thread()
+    driver_control()
 
-# def signal_handler(sig, frame):
-#     global running
-#     global distance_covered 
-#     global avg_speed
-#     print("singnal caught")
-#     running = 0
-#     # print("Distance Covered: {}".format(distance_covered))
-#     # print("Average Speed: {}".format(avg_speed))
-#     sys.exit(0)
+def init():
+    global logger
+    global map
+    global current_position
+    global orientation_degree
 
-# signal.signal(signal.SIGINT, signal_handler)
-
-if __name__ == '__main__':
     logger = PositionLogger()
     map = EnvironmentGrid()
     current_position = map.getCurrentPosition(logger=logger)
     orientation_degree = 0
     start_message = PositionMessage(orientation_degree, current_position, 0, IDLE)
     logger.append_log(start_message)
+
+if __name__ == '__main__':
     print("program has started... Ctrl+C to end")
     fire_up_threads()
-    driver_control()
     fc.stop()
+    print("Distance Covered: {}".format(distance_covered))
+    print("Average Speed: {}".format(avg_speed))
