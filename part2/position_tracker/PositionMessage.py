@@ -10,13 +10,12 @@ IDLE = "IDLE"
 
 # def get_meters_per_second():
 
-
 class PositionMessage():
-    def __init__(self, ts, od, p, s, mstate):
-        self.timestamp: dt.datetime = ts
-        self.orientation_degree = od
-        self.position = p
-        self.speed = s
+    def __init__(self, orientation_degree, position, speed, mstate):
+        self.timestamp: dt.datetime = dt.datetime.now()
+        self.orientation_degree = orientation_degree
+        self.position = position
+        self.speed = speed
         self.move_state = mstate
     
     def __str__(self):

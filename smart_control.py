@@ -1,4 +1,3 @@
-from picar_4wd import speed
 import picar_4wd as fc
 import sys
 import tty
@@ -6,6 +5,10 @@ import termios
 from threading import *
 import time
 import signal
+from part2.position_tracker.PositionMessage import *
+from part2.position_tracker.PositionLogger import *
+from part2.environmentMapping.environmentGrid import *
+from part2.environmentMapping.uv_scan import *
 
 power_val = 50
 key = 'status'
@@ -14,7 +17,11 @@ speed_cum = 0.0
 speed_num = 0
 avg_speed = 0.0
 running = 1
+orientation_degree = 0
+current_position = (0, 0)
 
+map: EnvironmentGrid = None
+logger: PositionLogger = None
 speedometer_thread: Thread = None
 keyboard_thread: Thread = None
 key_thread: Thread = None
@@ -40,6 +47,7 @@ def key_reader_handler():
     global key
     while running:
         key=readkey()
+        print(key)
 
 print("If you want the program quit. Please press q")
 def readchar():
@@ -75,9 +83,13 @@ def turn_servo(dir: int, at=2):
     print("Current Reading on Sensor: {}".format(fc.us.get_distance()))
 
 def Keyborad_control():
+    global power_val
     global running
+    global orientation_degree
+    global current_position
+    global avg_speed
+
     while running:
-        global power_val
         if key=='6':
             if power_val <=90:
                 power_val += 10
@@ -86,25 +98,30 @@ def Keyborad_control():
             if power_val >=10:
                 power_val -= 10
                 print("power_val:",power_val)
-
         if key=='w':
+            message = PositionMessage(orientation_degree, current_position, avg_speed, MOVING_FORWARD)
+            logger.append_log(message)
             fc.forward(power_val)
         elif key=='a':
+            message = PositionMessage(orientation_degree, current_position, avg_speed, TURNING_LEFT)
+            logger.append_log(message)
             fc.turn_left(power_val)
         elif key=='s':
+            message = PositionMessage(orientation_degree, current_position, avg_speed, MOVING_FORWARD)
+            logger.append_log(message)
             fc.backward(power_val)
         elif key=='d':
+            message = PositionMessage(orientation_degree, current_position, avg_speed, TURNING_RIGHT)
+            logger.append_log(message)
             fc.turn_right(power_val)
         elif key=='n':
             turn_servo(0)
         elif key=='m':
             turn_servo(1)
         else:
-            fc.stop()
-        
-        if key=='q':
-            print("quit")  
-            break  
+            message = PositionMessage(orientation_degree, current_position, avg_speed, IDLE)
+            logger.append_log(message)
+            fc.stop() 
         key = 'status'
 
 def start_speedometer_thread():
@@ -122,10 +139,15 @@ def start_key_thread():
     key_thread = Thread(target=Keyborad_control)
     key_thread.start()
 
+def start_key_thread():
+    global key_thread
+    key_thread = Thread(target=key_reader_handler)
+    key_thread.start()
+
 def fire_up_threads():
-    fc.start_speed_thread()
-    start_speedometer_thread()
-    start_keyboard_thread()
+    # fc.start_speed_thread()
+    # start_speedometer_thread()
+    # start_keyboard_thread()
     start_key_thread()
 
 def signal_handler(sig, frame):
@@ -140,4 +162,10 @@ def signal_handler(sig, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 if __name__ == '__main__':
+    map = EnvironmentGrid()
+    current_position = map.getCurrentPosition()
+    orientation_degree = 0
+    logger = PositionLogger()
+    start_message = PositionMessage(orientation_degree, current_position, 0, IDLE)
+    logger.append_log(start_message)
     fire_up_threads()
