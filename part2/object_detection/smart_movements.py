@@ -8,10 +8,12 @@ import detect_picamera as detect
 
 from time import sleep
 
+vision = detect.Vision()
 stopSignDetected = threading.Event()
 
 def kill_program(sig, frame):
     print("Killing smart movement")
+    del vision
     sys.exit(0)
 
 signal.signal(signal.SIGINT, kill_program)
@@ -31,9 +33,8 @@ def movement():
             sleep(1)
 
 def vision():
-    global stopSignDetected
     while (True):
-        if (detect.scanStopSign()):
+        if (vision.scanStopSign()):
             print("thread detect stopsign")
             stopSignDetected.set()
             sleep(10)

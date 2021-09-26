@@ -80,11 +80,10 @@ def detect_objects(interpreter, image, threshold):
   scores = get_output_tensor(interpreter, 2)
   count = int(get_output_tensor(interpreter, 3))
 
-
   for i in range(count):
     if scores[i] >= threshold and classes[i] == STOP_SIGN_ID:
-        return True,boxes[i]
-  return False, None
+        return True
+  return False
 
 
 def annotate_objects(annotator, results, labels):
@@ -106,46 +105,8 @@ def annotate_objects(annotator, results, labels):
 camera = None;
 
 def scanStopSign():
-  interpreter = Interpreter("detect.tflite")
-  interpreter.allocate_tensors()
-  _, input_height, input_width, _ = interpreter.get_input_details()[0]['shape']
-
-  # with picamera.PiCamera(
-  #     resolution=(CAMERA_WIDTH, CAMERA_HEIGHT), framerate=30) as camera:
-  global camera
-  camera = picamera.PiCamera(
-    resolution=(CAMERA_WIDTH, CAMERA_HEIGHT), framerate=30)
-  camera.vflip = True
-  camera.hflip = True
-  camera.start_preview()
-  camera.preview.alpha = 127
-  try:
-    stream = io.BytesIO()
-    annotator = Annotator(camera)
-    for _ in camera.capture_continuous(
-        stream, format='jpeg', use_video_port=True):
-      stream.seek(0)
-      image = Image.open(stream).convert('RGB').resize(
-          (input_width, input_height), Image.ANTIALIAS)
-      # start_time = time.monotonic()
-      stopSignDetected, box = detect_objects(interpreter, image, DETECT_THRESHOLD)
-      # elapsed_ms = (time.monotonic() - start_time) * 1000
-      if stopSignDetected:
-            print("detected stopsign")
-            
-            return True
-
-      # annotator.clear()
-      # annotate_objects(annotator, results, labels)
-      # annotator.text([5, 0], '%.1fms' % (elapsed_ms))
-      # annotator.update()
-
-      stream.seek(0)
-      stream.truncate()
-
-  finally:
-    camera.stop_preview()
-    camera.close()
+  
+ 
 
       
 
@@ -160,3 +121,36 @@ signal.signal(signal.SIGINT, signal_handler)
 
 if __name__ == '__main__':
   scanStopSign()
+
+
+class Vision:
+  def __init__(self):
+    self.interpreter = Interpreter("detect.tflite")
+    self.interpreter.allocate_tensors()
+    _, self.input_height, self.input_width, _ = self.interpreter.get_input_details()[0]['shape']
+
+    self.camera = picamera.PiCamera(
+      resolution=(CAMERA_WIDTH, CAMERA_HEIGHT), framerate=30)
+    self.camera.vflip = True
+    self.camera.hflip = True
+    self.camera.start_preview()
+    self.camera.preview.alpha = 127
+  
+  def scanStopSign(self):
+    stream = io.BytesIO()
+    for _ in self.camera.capture_continuous(
+        stream, format='jpeg', use_video_port=True):
+      stream.seek(0)
+      image = Image.open(stream).convert('RGB').resize(
+          (self.input_width, self.input_height), Image.ANTIALIAS)
+      stopSignDetected = detect_objects(self.interpreter, image, DETECT_THRESHOLD)
+      if stopSignDetected:
+            print("detected stopsign")
+            return True
+
+      stream.seek(0)
+      stream.truncate()
+
+    def __del__():
+      self.camera.stop_preview()
+      self.camera.close()
