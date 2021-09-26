@@ -132,8 +132,7 @@ def scanStopSign():
       # elapsed_ms = (time.monotonic() - start_time) * 1000
       if stopSignDetected:
             print("detected stopsign")
-            camera.stop_preview()
-            camera.close()
+            
             return True
 
       # annotator.clear()
@@ -146,6 +145,7 @@ def scanStopSign():
 
   finally:
     camera.stop_preview()
+    camera.close()
 
       
 
