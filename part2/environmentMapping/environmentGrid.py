@@ -93,17 +93,3 @@ class EnvironmentGrid:
         j = math.floor(x/self.granularity)
         i = math.floor(y/self.granularity)
         return [i, j]
-
-# # Testing the environment mapping
-
-# scanOutput = []
-# for i in range(90):
-#     currentOutput = (45 - i, 20)
-#     scanOutput.append(currentOutput)
-
-# testEnvironment = EnvironmentGrid(5, 100, 40)
-# testEnvironment.processScanOutput(scanOutput)
-
-# np.set_printoptions(threshold=sys.maxsize)
-
-# print(testEnvironment.map)
