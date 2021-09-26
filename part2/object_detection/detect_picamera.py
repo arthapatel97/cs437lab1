@@ -104,7 +104,7 @@ def annotate_objects(annotator, results, labels):
 
 camera = None;
 
-def main():
+def scanStopSign():
   parser = argparse.ArgumentParser(
       formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument(
@@ -144,6 +144,8 @@ def main():
       # start_time = time.monotonic()
       stopSignDetected, box = detect_objects(interpreter, image, args.threshold)
       # elapsed_ms = (time.monotonic() - start_time) * 1000
+      if stopSignDetected:
+            return True
 
       print(f'stopsign: {stopSignDetected}, box: {box}')
 

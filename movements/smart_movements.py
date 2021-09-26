@@ -1,9 +1,12 @@
-import signal
 import sys
-import os
+# sys.path.insert(1, './')
 
-from queue import Queue
+import signal
 import threading
+
+import picar_4wd as fc
+import part2.object_detection.detect_picamera as detect
+
 from time import sleep
 
 stopSignDetected = threading.Event()
@@ -16,13 +19,21 @@ signal.signal(signal.SIGINT, kill_program)
 
 def movement():
     while True:
-        print("movement")
+        if(stopSignDetected.is_set):
+            fc.turn_left(90)
+            sleep(1)
+            fc.forward(0)
+            sleep(3)
+
+        fc.forward(20)
         sleep(1)
 
 def vision():
     while (True):
-        print("vision")
-        sleep(1)
+        if (detect.scanStopSign()):
+            stopSignDetected.set()
+            sleep(10)
+        
 
 def main():
     visionThread = threading.Thread(target=vision)
