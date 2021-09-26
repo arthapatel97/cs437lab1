@@ -9,7 +9,7 @@ IMPACT_DISTANCE = 200
 
 def getMap(granularity=GRANULARITY, sideLength=SIDE_LENGTH, impactDistance=IMPACT_DISTANCE):
     # Sam, put the output of your function here
-    scanOutput = sam.get_enivroment_data(10)
+    scanOutput = sam.get_enivroment_data(2)
     print(scanOutput)
 
     testEnvironment = env.EnvironmentGrid(granularity, sideLength, impactDistance)

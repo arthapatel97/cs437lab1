@@ -13,7 +13,6 @@ def get_enivroment_data(angle_interval=2):
         readings_list = []
         for i in range(5):
             readings_list.append(fc.us.get_distance())
-
         servo_map.append((fc.current_angle, numpy.max(numpy.array(readings_list))))
         time.sleep(0.001)
     return servo_map
