@@ -94,6 +94,7 @@ def Keyborad_control():
             turn_servo(1)
         else:
             fc.stop()
+        key = 'status'
         if key=='q':
             print("quit")  
             break  
