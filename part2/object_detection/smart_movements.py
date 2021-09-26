@@ -8,8 +8,9 @@ import detect_picamera as detect
 
 from time import sleep
 
-vision = detect.Vision()
+visionObject = detect.Vision()
 stopSignDetected = threading.Event()
+stopSignCleared = threading.Event()
 
 def kill_program(sig, frame):
     print("Killing smart movement")
@@ -28,20 +29,29 @@ def movement():
             fc.forward(0)
             sleep(3)
             stopSignDetected.clear()
+
+            # greenlight to vision
+            stopSignCleared.set()
         else: 
             fc.forward(20)
             sleep(1)
 
 def vision():
     while (True):
-        if (vision.scanStopSign()):
+        if (visionObject.scanStopSign()):
             print("thread detect stopsign")
             stopSignDetected.set()
-            sleep(10)
+
+            # wait until avoidance sequence is done
+            stopSignCleared.wait()
+            stopSignCleared.clear()
+            
+            # wait until movement sequence is done
         
 
 def main():
     stopSignDetected.clear()
+    stopSignCleared.clear()
     fc.servo.set_angle(0)
 
     visionThread = threading.Thread(target=vision)
