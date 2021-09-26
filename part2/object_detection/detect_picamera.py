@@ -129,8 +129,10 @@ def main():
   global camera
   camera = picamera.PiCamera(
     resolution=(CAMERA_WIDTH, CAMERA_HEIGHT), framerate=30)
+  camera.vflip = True
+  camera.hflip = True
   camera.start_preview()
-  camera.preview.alpha = 128
+  camera.preview.alpha = 127
   try:
     stream = io.BytesIO()
     annotator = Annotator(camera)
