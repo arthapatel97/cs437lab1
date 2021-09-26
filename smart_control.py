@@ -15,8 +15,9 @@ speed_num = 0
 avg_speed = 0.0
 running = 1
 
-speedometer: Thread = None
-keyboard: Thread = None
+speedometer_thread: Thread = None
+keyboard_thread: Thread = None
+key_thread: Thread = None
 
 def speedometer_handler():
     global speed_num
@@ -34,6 +35,11 @@ def speedometer_handler():
         avg_speed = round(speed_cum/speed_num, 2)
         # print("Average Speed: {}".format(avg_speed))
         time.sleep(0.5)
+
+def key_reader_handler():
+    global key
+    while running:
+        key=readkey()
 
 print("If you want the program quit. Please press q")
 def readchar():
@@ -72,8 +78,6 @@ def Keyborad_control():
     global running
     while running:
         global power_val
-        print("new")
-        key=readkey()
         if key=='6':
             if power_val <=90:
                 power_val += 10
@@ -104,19 +108,25 @@ def Keyborad_control():
         key = 'status'
 
 def start_speedometer_thread():
-    global speedometer
-    speedometer = Thread(target=speedometer_handler)
-    speedometer.start()
+    global speedometer_thread
+    speedometer_thread = Thread(target=speedometer_handler)
+    speedometer_thread.start()
 
 def start_keyboard_thread():
-    global keyboard
-    keyboard = Thread(target=Keyborad_control)
-    keyboard.start()
+    global keyboard_thread
+    keyboard_thread = Thread(target=Keyborad_control)
+    keyboard_thread.start()
+
+def start_key_thread():
+    global key_thread
+    key_thread = Thread(target=Keyborad_control)
+    key_thread.start()
 
 def fire_up_threads():
     fc.start_speed_thread()
     start_speedometer_thread()
     start_keyboard_thread()
+    start_key_thread()
 
 def signal_handler(sig, frame):
     global running
