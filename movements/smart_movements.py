@@ -24,6 +24,7 @@ def movement():
             sleep(1)
             fc.forward(0)
             sleep(3)
+            stopSignDetected.clear()
 
         fc.forward(20)
         sleep(1)
