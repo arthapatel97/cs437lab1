@@ -23,23 +23,37 @@ def kill_program(sig, frame):
 signal.signal(signal.SIGINT, kill_program)
 
 def movement():
-    global stopSignDetected
     while True:
         if(stopSignDetected.is_set()):
-            print("reacting to stopsign")
-            fc.forward(0)
-            sleep(3)
-
-            fc.turn_left(40)
-            sleep(1.5)
-
-            stopSignDetected.clear()
+            stopSignMove()
 
             # greenlight to vision
+            stopSignDetected.clear()
             stopSignCleared.set()
         else: 
             fc.forward(20)
             sleep(.001)
+
+def stopSignMove():
+    print("reacting to stopsign")
+    # Stops for .5s
+    fc.forward(0)
+    sleep(0.5)
+
+    # Squiggle for some time
+    for i in range(2):
+        fc.backward(10)
+        sleep(0.2)
+        fc.forward(10)
+        sleep(0.2)
+
+    # Stops for 2s
+    fc.forward(0)
+    sleep(2)
+
+    # Turns left
+    fc.turn_left(90)
+    sleep(0.8)
 
 def vision():
     while (True):
@@ -50,8 +64,6 @@ def vision():
             # wait until avoidance sequence is done
             stopSignCleared.wait()
             stopSignCleared.clear()
-            
-            # wait until movement sequence is done
         
 
 def main():
@@ -67,9 +79,6 @@ def main():
     visionThread.start()
 
     movement()
-
-
-
 
 if __name__ == '__main__':
       main()
