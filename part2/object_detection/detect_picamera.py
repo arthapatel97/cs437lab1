@@ -38,6 +38,7 @@ CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
 
 STOP_SIGN_ID = 12
+DETECT_THRESHOLD = 0.4
 
 
 def load_labels(path):
@@ -105,22 +106,7 @@ def annotate_objects(annotator, results, labels):
 camera = None;
 
 def scanStopSign():
-  parser = argparse.ArgumentParser(
-      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument(
-      '--model', help='File path of .tflite file.', required=True)
-  parser.add_argument(
-      '--labels', help='File path of labels file.', required=True)
-  parser.add_argument(
-      '--threshold',
-      help='Score threshold for detected objects.',
-      required=False,
-      type=float,
-      default=0.4)
-  args = parser.parse_args()
-
-  labels = load_labels(args.labels)
-  interpreter = Interpreter(args.model)
+  interpreter = Interpreter("detect.tflite")
   interpreter.allocate_tensors()
   _, input_height, input_width, _ = interpreter.get_input_details()[0]['shape']
 
@@ -142,12 +128,13 @@ def scanStopSign():
       image = Image.open(stream).convert('RGB').resize(
           (input_width, input_height), Image.ANTIALIAS)
       # start_time = time.monotonic()
-      stopSignDetected, box = detect_objects(interpreter, image, args.threshold)
+      stopSignDetected, box = detect_objects(interpreter, image, DETECT_THRESHOLD)
       # elapsed_ms = (time.monotonic() - start_time) * 1000
       if stopSignDetected:
+            print("detected stopsign")
+            camera.stop_preview()
+            camera.close()
             return True
-
-      print(f'stopsign: {stopSignDetected}, box: {box}')
 
       # annotator.clear()
       # annotate_objects(annotator, results, labels)
@@ -172,4 +159,4 @@ def signal_handler(sig, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 if __name__ == '__main__':
-  main()
+  scanStopSign()

@@ -1,15 +1,14 @@
 import sys
-# sys.path.insert(1, './')
 
 import signal
 import threading
 
 import picar_4wd as fc
-import part2.object_detection.detect_picamera as detect
+import detect_picamera as detect
 
 from time import sleep
 
-stopSignDetected = threading.Event()
+stopSignDetected = False
 
 def kill_program(sig, frame):
     print("Killing smart movement")
@@ -18,26 +17,31 @@ def kill_program(sig, frame):
 signal.signal(signal.SIGINT, kill_program)
 
 def movement():
+    global stopSignDetected
     while True:
-        if(stopSignDetected.is_set):
+        if(stopSignDetected):
+            print("reacting to stopsign")
             fc.turn_left(90)
             sleep(1)
             fc.forward(0)
             sleep(3)
-            stopSignDetected.clear()
-
-        fc.forward(20)
-        sleep(1)
+            stopSignDetected = False
+        else: 
+            fc.forward(20)
+            sleep(1)
 
 def vision():
+    global stopSignDetected
     while (True):
         if (detect.scanStopSign()):
-            stopSignDetected.set()
+            print("thread detect stopsign")
+            stopSignDetected = True
             sleep(10)
         
 
 def main():
     visionThread = threading.Thread(target=vision)
+    fc.servo.set_angle(0)
 
     # vision & ultrasonic are daemon threads (dependent on movement)
     visionThread.daemon = True

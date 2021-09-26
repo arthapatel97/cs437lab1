@@ -1,4 +1,4 @@
-
+from time import sleep
 def power_read():
     from picar_4wd.adc import ADC
     power_read_pin = ADC('A4')
