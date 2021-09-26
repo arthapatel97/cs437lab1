@@ -32,14 +32,15 @@ def speedometer_handler():
     global avg_speed
     global distance_covered
     global running
-
+    start = time.monotonic()
     while running:
         current_speed = fc.speed_val()
-        distance_covered += current_speed * 0.5
         speed_num += 1
         speed_cum += current_speed
         avg_speed = round(speed_cum/speed_num, 2)
         time.sleep(0.5)
+    diff = (time.monotonic() - start)
+    distance_covered = diff * avg_speed
 
 def key_reader_handler():
     global key
@@ -112,10 +113,8 @@ def driver_control():
             fc.turn_right(power_val)
         elif key=='n':
             turn_servo(0)
-            key = 'status'
         elif key=='m':
             turn_servo(1)
-            key = 'status'
         else:
             logger.append_log(PositionMessage(orientation_degree, current_position, avg_speed, IDLE))
             fc.stop()
@@ -132,8 +131,8 @@ def start_key_thread():
 
 def fire_up_threads():
     init()
-    fc.start_speed_thread()
-    start_speedometer_thread()
+    # fc.start_speed_thread()
+    # start_speedometer_thread()
     start_key_thread()
     driver_control()
 
