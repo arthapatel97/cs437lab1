@@ -1,9 +1,11 @@
+from picar_4wd import speed
 import picar_4wd as fc
 import sys
 import tty
 import termios
 from threading import *
 import time
+import signal
 
 power_val = 50
 key = 'status'
@@ -12,6 +14,9 @@ speed_cum = 0.0
 speed_num = 0
 avg_speed = 0.0
 running = 1
+
+speedometer: Thread = None
+keyboard: Thread = None
 
 def speedometer_handler():
     global speed_num
@@ -23,16 +28,12 @@ def speedometer_handler():
     while running:
         current_speed = fc.speed_val()
         distance_covered += current_speed * 0.5
-        print("Distance Covered: {}".format(distance_covered))
+        # print("Distance Covered: {}".format(distance_covered))
         speed_num += 1
         speed_cum += current_speed
         avg_speed = round(speed_cum/speed_num, 2)
-        print("Average Speed: {}".format(avg_speed))
+        # print("Average Speed: {}".format(avg_speed))
         time.sleep(0.5)
-
-def fire_up_thread():
-    speedometer = Thread(target=speedometer_handler)
-    speedometer.start()
 
 print("If you want the program quit. Please press q")
 def readchar():
@@ -68,8 +69,10 @@ def turn_servo(dir: int, at=2):
     print("Current Reading on Sensor: {}".format(fc.us.get_distance()))
 
 def Keyborad_control():
-    while True:
+    global running
+    while running:
         global power_val
+        print("new")
         key=readkey()
         if key=='6':
             if power_val <=90:
@@ -94,13 +97,37 @@ def Keyborad_control():
             turn_servo(1)
         else:
             fc.stop()
-        key = 'status'
+        
         if key=='q':
             print("quit")  
             break  
+        key = 'status'
+
+def start_speedometer_thread():
+    global speedometer
+    speedometer = Thread(target=speedometer_handler)
+    speedometer.start()
+
+def start_keyboard_thread():
+    global keyboard
+    keyboard = Thread(target=Keyborad_control)
+    keyboard.start()
+
+def fire_up_threads():
+    fc.start_speed_thread()
+    start_speedometer_thread()
+    start_keyboard_thread()
+
+def signal_handler(sig, frame):
+    global running
+    global distance_covered 
+    global avg_speed
+    running = 0
+    print("Distance Covered: {}".format(distance_covered))
+    print("Average Speed: {}".format(avg_speed))
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 if __name__ == '__main__':
-    fc.start_speed_thread()
-    fire_up_thread()
-    Keyborad_control()
-    running = 0
+    fire_up_threads()
