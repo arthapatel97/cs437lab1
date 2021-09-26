@@ -37,6 +37,8 @@ from tflite_runtime.interpreter import Interpreter
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
 
+STOP_SIGN_ID = 12
+
 
 def load_labels(path):
   """Loads the labels file. Supports files with or without index numbers."""
@@ -65,7 +67,7 @@ def get_output_tensor(interpreter, index):
   tensor = np.squeeze(interpreter.get_tensor(output_details['index']))
   return tensor
 
-
+# Returns if stop sign detected, also the boxes[i] object
 def detect_objects(interpreter, image, threshold):
   """Returns a list of detection results, each a dictionary of object info."""
   set_input_tensor(interpreter, image)
@@ -77,18 +79,11 @@ def detect_objects(interpreter, image, threshold):
   scores = get_output_tensor(interpreter, 2)
   count = int(get_output_tensor(interpreter, 3))
 
-  results = []
+
   for i in range(count):
-    if scores[i] >= threshold:
-      result = {
-          'bounding_box': boxes[i],
-          'class_id': classes[i],
-          'score': scores[i]
-      }
-      if classes[i] == 12:
-            print("STOP SIGN!!!!!!!!")
-      results.append(result)
-  return results
+    if scores[i] >= threshold and classes[i] == STOP_SIGN_ID:
+        return True,boxes[i]
+  return False, None
 
 
 def annotate_objects(annotator, results, labels):
@@ -144,16 +139,16 @@ def main():
       stream.seek(0)
       image = Image.open(stream).convert('RGB').resize(
           (input_width, input_height), Image.ANTIALIAS)
-      start_time = time.monotonic()
-      results = detect_objects(interpreter, image, args.threshold)
-      class_id = results
-      # print("results: {}".format(results))
-      elapsed_ms = (time.monotonic() - start_time) * 1000
+      # start_time = time.monotonic()
+      stopSignDetected, box = detect_objects(interpreter, image, args.threshold)
+      # elapsed_ms = (time.monotonic() - start_time) * 1000
 
-      annotator.clear()
-      annotate_objects(annotator, results, labels)
-      annotator.text([5, 0], '%.1fms' % (elapsed_ms))
-      annotator.update()
+      print(f'stopsign: {stopSignDetected}, box: {box}')
+
+      # annotator.clear()
+      # annotate_objects(annotator, results, labels)
+      # annotator.text([5, 0], '%.1fms' % (elapsed_ms))
+      # annotator.update()
 
       stream.seek(0)
       stream.truncate()
