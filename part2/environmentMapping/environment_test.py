@@ -3,13 +3,14 @@ import uv_scan as sam
 import numpy as np
 from PIL import Image
 
-GRANULARITY = 1
-SIDE_LENGTH = 90
-IMPACT_DISTANCE = 40
+GRANULARITY = 5
+SIDE_LENGTH = 200
+IMPACT_DISTANCE = 200
 
 def getMap(granularity=GRANULARITY, sideLength=SIDE_LENGTH, impactDistance=IMPACT_DISTANCE):
     # Sam, put the output of your function here
-    scanOutput = sam.get_enivroment_data(1)
+    scanOutput = sam.get_enivroment_data(10)
+    print(scanOutput)
 
     testEnvironment = env.EnvironmentGrid(granularity, sideLength, impactDistance)
     testEnvironment.processScanOutput(scanOutput)
@@ -27,4 +28,4 @@ def getMap(granularity=GRANULARITY, sideLength=SIDE_LENGTH, impactDistance=IMPAC
     return map
 
 if __name__ == "__main__":
-    print(getMap())
+    getMap()
