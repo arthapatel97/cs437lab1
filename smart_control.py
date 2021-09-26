@@ -2,35 +2,37 @@ import picar_4wd as fc
 import sys
 import tty
 import termios
-import asyncio
-import threading
+from threading import *
+import time
 
 power_val = 50
-
-servo_step = 2
-
 key = 'status'
+distance_covered = 0.0
+speed_cum = 0.0
+speed_num = 0
+avg_speed = 0.0
+running = 1
 
-distances_list = []
-servo_map = []
+def speedometer_handler():
+    global speed_num
+    global speed_cum
+    global avg_speed
+    global distance_covered
+    global running
 
-def init_servo_map(angle_interval=2):
-    global servo_map
+    while running:
+        current_speed = fc.speed_val()
+        distance_covered += current_speed * 0.5
+        print("Distance Covered: {}".format(distance_covered))
+        speed_num += 1
+        speed_cum += current_speed
+        avg_speed = round(speed_cum/speed_num, 2)
+        print("Average Speed: {}".format(avg_speed))
+        time.sleep(0.5)
 
-    angle = fc.max_angle
-    while angle >= fc.min_angle:
-        angle -= angle_interval
-        servo_map.append((angle, 0))
-
-
-def scan_surrondings(angle_interval=2):
-    global servo_map
-
-    fc.servo.set_angle(fc.max_angle)
-    while fc.current_angle >= fc.min_angle:
-        fc.current_angle -= angle_interval
-        fc.servo.set_angle(fc.current_angle)
-        servo_map.append((fc.current_angle, fc.us.get_distance()))
+def fire_up_thread():
+    speedometer = Thread(target=speedometer_handler)
+    speedometer.start()
 
 print("If you want the program quit. Please press q")
 def readchar():
@@ -97,9 +99,7 @@ def Keyborad_control():
             break  
 
 if __name__ == '__main__':
-    # scan_surrondings()
-    # print(servo_map)
-    # print(len(servo_map))
-    # fc.servo.set_angle(0)
-    
+    fc.start_speed_thread()
+    fire_up_thread()
     Keyborad_control()
+    running = 0

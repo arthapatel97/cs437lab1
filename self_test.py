@@ -3,7 +3,6 @@ import time
 from threading import *
 
 distance_covered = 0.0
-
 speed_cum = 0.0
 speed_num = 0
 avg_speed = 0.0
@@ -49,14 +48,5 @@ if __name__ == "__main__":
     time.sleep(1)
     fc.stop()
     running = 1
-    # distance = fc.us.get_distance()
-    # print(distance)
-    # while True:
-    #     fc.servo.set_angle(fc.min_angle)
-    #     time.sleep(2)
-    #     print("right MIN_ANGLE read: {}".format(fc.us.get_distance()))
-    #     fc.servo.set_angle(fc.max_angle)
-    #     time.sleep(2)
-    #     print("left MAX_ANGLE read: {}".format(fc.us.get_distance()))
 
 
