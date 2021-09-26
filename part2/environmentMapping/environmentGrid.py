@@ -1,6 +1,8 @@
 import numpy as np
 import sys
 import math
+from position_tracker.PositionLogger import *
+from position_tracker.PositionMessage import *
 
 # Calculates x,y position given angle and distance
 # returns a tuple of (xnew,ynew)
@@ -12,7 +14,7 @@ def getPosition(x_origin, y_origin, angle, dist):
 # The origin of the orientation is parallel to the X-axis, and increasing
 # the angle is counter-clockwise, and decreasing the angle is clockwise
 class EnvironmentGrid:
-    def __init__(self, granularity, sideLength, impactDistance):
+    def __init__(self, granularity=15, sideLength=4000, impactDistance=4000000):
         self.initializeEmptyGrid(granularity, sideLength, impactDistance)
     
     # Initializes an empty grid with a certain granularity and sideLength
@@ -40,6 +42,27 @@ class EnvironmentGrid:
 
         # impactDistance is the threshold distance that is considered to be an impact risk
         self.impactDistance = impactDistance
+
+    def getCurrentPosition(self, logger: PositionLogger):
+        self.updateCurrentPositionOrientation(logger=logger)
+        return (self.robotX, self.robotY)
+
+    def updateCurrentPositionOrientation(self, logger: PositionLogger):
+        last_message: PositionMessage = logger.get_last_log()
+        last_message_timestamp = last_message.timestamp
+        current_time = dt.datetime.now()
+        last_message_move_state = last_message.move_state
+        if last_message_move_state == MOVING_FORWARD:
+            pass
+        elif last_message_move_state == MOVING_BACKWARD:
+            pass 
+        elif last_message_move_state == TURNING_LEFT:
+            pass
+        elif last_message_move_state == TURNING_RIGHT:
+            pass
+        last_message_speed = last_message.speed
+        
+        pass
 
     # Takes the output of the picar as input.
     # scanOutput is a list of tuples, where each tuple
