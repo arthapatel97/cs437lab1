@@ -13,8 +13,11 @@ stopSignDetected = threading.Event()
 stopSignCleared = threading.Event()
 
 def kill_program(sig, frame):
+    global visionObject
     print("Killing smart movement")
-    del vision
+    del visionObject
+
+    fc.forward(0)
     sys.exit(0)
 
 signal.signal(signal.SIGINT, kill_program)
@@ -24,17 +27,19 @@ def movement():
     while True:
         if(stopSignDetected.is_set()):
             print("reacting to stopsign")
-            fc.turn_left(90)
-            sleep(1)
             fc.forward(0)
             sleep(3)
+
+            fc.turn_left(40)
+            sleep(1.5)
+
             stopSignDetected.clear()
 
             # greenlight to vision
             stopSignCleared.set()
         else: 
             fc.forward(20)
-            sleep(1)
+            sleep(.001)
 
 def vision():
     while (True):

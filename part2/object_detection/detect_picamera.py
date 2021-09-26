@@ -103,12 +103,7 @@ def annotate_objects(annotator, results, labels):
                    '%s\n%.2f' % (labels[obj['class_id']], obj['score']))
 
 camera = None;
-
-def scanStopSign():
-  
- 
-
-      
+     
 
 ## Catches SIGINT and remove camera window
 def signal_handler(sig, frame):
@@ -131,8 +126,6 @@ class Vision:
 
     self.camera = picamera.PiCamera(
       resolution=(CAMERA_WIDTH, CAMERA_HEIGHT), framerate=30)
-    self.camera.vflip = True
-    self.camera.hflip = True
     self.camera.start_preview()
     self.camera.preview.alpha = 127
   
