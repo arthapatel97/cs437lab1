@@ -1,8 +1,8 @@
 import numpy as np
 import sys
 import math
-from position_tracker.PositionLogger import *
-from position_tracker.PositionMessage import *
+from PositionLogger import *
+from PositionMessage import *
 
 # Calculates x,y position given angle and distance
 # returns a tuple of (xnew,ynew)
@@ -44,7 +44,7 @@ class EnvironmentGrid:
         self.impactDistance = impactDistance
 
     def getCurrentPosition(self, logger: PositionLogger):
-        self.updateCurrentPositionOrientation(logger=logger)
+        # self.updateCurrentPositionOrientation(logger=logger)
         return (self.robotX, self.robotY)
 
     def updateCurrentPositionOrientation(self, logger: PositionLogger):
