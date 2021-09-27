@@ -131,8 +131,8 @@ def start_key_thread():
 
 def fire_up_threads():
     init()
-    # fc.start_speed_thread()
-    # start_speedometer_thread()
+    fc.start_speed_thread()
+    start_speedometer_thread()
     start_key_thread()
     driver_control()
 
