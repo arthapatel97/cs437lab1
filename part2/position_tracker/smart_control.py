@@ -89,6 +89,8 @@ def driver_control():
     global current_position
     global avg_speed
     global key
+    global map
+    global logger
 
     while running:
         if key=='6':
@@ -100,15 +102,19 @@ def driver_control():
                 power_val -= 10
                 print("decreased power supply to: {power_val}")
         if key=='w':
+            current_position = map.updateCurrentPositionOrientation(logger)
             logger.append_log(PositionMessage(orientation_degree, current_position, avg_speed, MOVING_FORWARD))
             fc.forward(power_val)
         elif key=='a':
+            current_position = map.updateCurrentPositionOrientation(logger)
             logger.append_log(PositionMessage(orientation_degree, current_position, avg_speed, TURNING_LEFT))
             fc.turn_left(power_val)
         elif key=='s':
+            current_position = map.updateCurrentPositionOrientation(logger)
             logger.append_log(PositionMessage(orientation_degree, current_position, avg_speed, MOVING_FORWARD))
             fc.backward(power_val)
         elif key=='d':
+            current_position = map.updateCurrentPositionOrientation(logger)
             logger.append_log(PositionMessage(orientation_degree, current_position, avg_speed, TURNING_RIGHT))
             fc.turn_right(power_val)
         elif key=='n':
@@ -116,6 +122,7 @@ def driver_control():
         elif key=='m':
             turn_servo(1)
         else:
+            current_position = map.updateCurrentPositionOrientation(logger)
             logger.append_log(PositionMessage(orientation_degree, current_position, avg_speed, IDLE))
             fc.stop()
 
