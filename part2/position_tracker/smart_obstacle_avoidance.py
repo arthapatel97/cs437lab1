@@ -4,53 +4,48 @@ import random
 from threading import *
 from queue import *
 
+TURNING_RIGHT = "TURNING_RIGHT"
+TURNING_LEFT = "TURNING_LEFT"
+MOVING_FORWARD = "MOVING_FORWARD"
+MOVING_BACKWARD = "MOVING_BACKWARD"
+IDLE = "IDLE"
+
 speed = 50
 status = 0
-
-q: Queue = None
-us_scanning_thread: Thread = None
-
-def us_scanning_handler():
-    global status
-    global q
-    while True:
-        status = fc.get_status_at(0)
-        
-        pass
+car_state = IDLE
 
 def driving_handler():
     global status
-    global q
+    global car_state
+    global speed
 
     while True:
-
-
-
-def main():
-    while True:
-        scan_list = fc.scan_step(35)
-        if not scan_list:
-            continue
-
-        tmp = scan_list[3:7]
-        print(tmp)
-        if tmp != [2,2,2,2]:
+        status = fc.get_status_at(0, 50, 20)
+        if status == 0:
+            fc.stop()
             fc.backward(speed)
-            time.sleep(0.5)
+            time.sleep(1)
             turn_direction = random.choice([0,1])
             if (turn_direction):
                 fc.turn_right(speed)
             else:
                 fc.turn_left(speed)
+            time.sleep(2)
+        elif status == 1:
+            speed /= 2
+            if car_state == MOVING_FORWARD:
+                fc.forward(speed)
+            elif car_state == MOVING_FORWARD:
+                fc.backward(speed)
         else:
             fc.forward(speed)
 
-def start_us_scanning_thread():
-    global us_scanning_thread
-    us_scanning_thread = Thread(target=)
-
 if __name__ == "__main__":
-    try: 
-        main()
-    finally: 
+    speed = 50
+    status = 0
+    car_state = IDLE
+
+    try:
+        driving_handler
+    finally:
         fc.stop()
