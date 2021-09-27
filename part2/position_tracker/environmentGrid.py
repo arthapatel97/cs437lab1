@@ -118,11 +118,12 @@ class EnvironmentGrid:
     def recordObstacle(self, angle, distance):
         objectX, objectY = getPosition(self.robotX, self.robotY, self.RobotOrientation + angle, distance)
         i, j = self.mapPositionToCell(objectX, objectY)
+        print("angle", angle, " ", (i,j))
         if (self.isValidCell(i, j)):
             self.map[i,j] = 1
     
     # Returns the coordinates of a cell after being given the x and y position
     def mapPositionToCell(self, x, y):
         j = math.floor(x/self.granularity)
-        i = math.floor(y/self.granularity)
+        i = np.shape(self.map)[0] - 1 - math.floor(y/self.granularity)
         return [i, j]
