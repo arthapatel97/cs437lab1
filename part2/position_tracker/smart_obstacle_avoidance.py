@@ -32,12 +32,13 @@ def driving_handler():
                 fc.turn_left(speed)
             time.sleep(2)
         elif status == 1:
-            speed /= 2
+            speed = 10
             if car_state == MOVING_FORWARD:
                 fc.forward(speed)
             elif car_state == MOVING_FORWARD:
                 fc.backward(speed)
         else:
+            speed = 50
             fc.forward(speed)
 
 if __name__ == "__main__":
