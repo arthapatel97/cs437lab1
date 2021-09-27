@@ -4,17 +4,22 @@ import math
 from PositionLogger import *
 from PositionMessage import *
 
+DEFAULT_GRANULARITY=20          # 15cm
+DEFAULT_SIDE_LENGTH=4000        # 40m
+DEFAULT_VIEW_DISTANCE=40000     # essentially unlimited
+
 # Calculates x,y position given angle and distance
 # returns a tuple of (xnew,ynew)
 def getPosition(x_origin, y_origin, angle, dist):
-    return (x_origin + dist*np.cos(math.radians(angle)), y_origin + dist*np.sin(math.radians(angle)))
+    return (x_origin + dist*np.cos(math.radians(angle)), y_origin - dist*np.sin(math.radians(angle)))
 
 # The environment grid that will contain our robot's surroundings
 # Origin is at the top-left corner
 # The origin of the orientation is parallel to the X-axis, and increasing
 # the angle is counter-clockwise, and decreasing the angle is clockwise
 class EnvironmentGrid:
-    def __init__(self, granularity=15, sideLength=4000, impactDistance=4000000):
+    def __init__(self, granularity=DEFAULT_GRANULARITY, sideLength=DEFAULT_SIDE_LENGTH,
+                        impactDistance=DEFAULT_VIEW_DISTANCE):
         self.initializeEmptyGrid(granularity, sideLength, impactDistance)
     
     # Initializes an empty grid with a certain granularity and sideLength
@@ -43,26 +48,31 @@ class EnvironmentGrid:
         # impactDistance is the threshold distance that is considered to be an impact risk
         self.impactDistance = impactDistance
 
-    def getCurrentPosition(self, logger: PositionLogger):
-        # self.updateCurrentPositionOrientation(logger=logger)
+    # Returns the current position as a tuple of two values
+    def getRecordedPosition(self, logger: PositionLogger):
         return (self.robotX, self.robotY)
 
+    # Updates both the position and orientation after a new command has been
+    # given to the car
     def updateCurrentPositionOrientation(self, logger: PositionLogger):
         last_message: PositionMessage = logger.get_last_log()
-        last_message_timestamp = last_message.timestamp
+        last_message_time = last_message.timestamp
         current_time = dt.datetime.now()
+
+        delta_seconds = (current_time - last_message_time).total_seconds()
         last_message_move_state = last_message.move_state
+        speed_up_to_now = last_message.speed
+
         if last_message_move_state == MOVING_FORWARD:
-            pass
+            self.updatePosition(delta_seconds, speed_up_to_now)
         elif last_message_move_state == MOVING_BACKWARD:
-            pass 
+            self.updatePosition(delta_seconds, -speed_up_to_now)
         elif last_message_move_state == TURNING_LEFT:
-            pass
+            self.updateOrientation(delta_seconds, speed_up_to_now)
         elif last_message_move_state == TURNING_RIGHT:
-            pass
-        last_message_speed = last_message.speed
+            self.updateOrientation(delta_seconds, -speed_up_to_now)
         
-        pass
+        return (self.robotX, self.robotY)
 
     # Takes the output of the picar as input.
     # scanOutput is a list of tuples, where each tuple
