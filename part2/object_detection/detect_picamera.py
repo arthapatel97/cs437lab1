@@ -114,10 +114,6 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-if __name__ == '__main__':
-  scanStopSign()
-
-
 class Vision:
   def __init__(self):
     self.interpreter = Interpreter("detect.tflite")
@@ -147,3 +143,8 @@ class Vision:
     def __del__():
       self.camera.stop_preview()
       self.camera.close()
+
+if __name__ == '__main__':
+  vis = Vision()
+  vis.scanStopSign()
+  del vis
