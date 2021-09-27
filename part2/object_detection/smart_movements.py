@@ -8,41 +8,70 @@ import detect_picamera as detect
 
 from time import sleep
 
-stopSignDetected = False
+visionObject = detect.Vision()
+stopSignDetected = threading.Event()
+stopSignCleared = threading.Event()
 
 def kill_program(sig, frame):
+    global visionObject
     print("Killing smart movement")
+    del visionObject
+
+    fc.forward(0)
     sys.exit(0)
 
 signal.signal(signal.SIGINT, kill_program)
 
 def movement():
-    global stopSignDetected
     while True:
-        if(stopSignDetected):
-            print("reacting to stopsign")
-            fc.turn_left(90)
-            sleep(1)
-            fc.forward(0)
-            sleep(3)
-            stopSignDetected = False
+        if(stopSignDetected.is_set()):
+            stopSignMove()
+
+            # greenlight to vision
+            stopSignDetected.clear()
+            stopSignCleared.set()
         else: 
             fc.forward(20)
-            sleep(1)
+            sleep(.001)
+
+def stopSignMove():
+    print("reacting to stopsign")
+    # Stops for .5s
+    fc.forward(0)
+    sleep(0.5)
+
+    # Squiggle for some time
+    for i in range(2):
+        fc.backward(10)
+        sleep(0.2)
+        fc.forward(10)
+        sleep(0.2)
+
+    # Stops for 2s
+    fc.forward(0)
+    sleep(2)
+
+    # Turns left
+    fc.turn_left(90)
+    sleep(0.8)
 
 def vision():
-    global stopSignDetected
     while (True):
-        if (detect.scanStopSign()):
+        if (visionObject.scanStopSign()):
             print("thread detect stopsign")
-            stopSignDetected = True
-            sleep(10)
+            stopSignDetected.set()
+
+            # wait until avoidance sequence is done
+            stopSignCleared.wait()
+            stopSignCleared.clear()
         
 
 def main():
-    visionThread = threading.Thread(target=vision)
+    stopSignDetected.clear()
+    stopSignCleared.clear()
     fc.servo.set_angle(0)
 
+    visionThread = threading.Thread(target=vision)
     # vision & ultrasonic are daemon threads (dependent on movement)
     visionThread.daemon = True
 
@@ -50,9 +79,6 @@ def main():
     visionThread.start()
 
     movement()
-
-
-
 
 if __name__ == '__main__':
       main()
